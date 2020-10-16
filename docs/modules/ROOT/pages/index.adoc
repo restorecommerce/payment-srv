@@ -1,0 +1,198 @@
+= Payment Service
+
+https://travis-ci.org/restorecommerce/payment-srv?branch=master[image:https://img.shields.io/travis/restorecommerce/payment-srv/master.svg?style=flat-square[Build Status]]
+https://david-dm.org/restorecommerce/payment-srv[image:https://img.shields.io/david/restorecommerce/payment-srv.svg?style=flat-square[Dependencies]]
+https://coveralls.io/github/restorecommerce/payment-srv?branch=master[image:https://img.shields.io/coveralls/restorecommerce/payment-srv/master.svg?style=flat-square[Coverage Status]]
+
+A microservice for handling payment authorizations and purchases.
+
+[#features]
+== Features
+
+* Supports 100+ payment providers. (https://github.com/activemerchant/active_merchant#supported-payment-gateways[Full List])
+* Utilizes https://github.com/activemerchant/active_merchant[Active Merchant] as the underlying platform.
+* Exposes a https://grpc.io/docs/[gRPC] interface for handling payment specific functionality.
+* Supports both _authorization_ and _purchase style_ payment flows.
+
+
+[#configuration]
+== Configuration
+
+[#configuration_purchase_flow]
+=== Purchase flow
+
+The purchase flow is the simpler option.
+
+It goes through the following steps:
+
+. Setup the purchase flow (`SetupPurchase` method)
+. User redirection to the payment platform page
+. After user returns from payment platform, complete the payment (`Purchase` method)
+
+It does not require a checkout or approval page on the store page.
+
+[#configuration_authorization_flow]
+=== Authorization Flow
+
+The authorization flow utilizes the option that after returning from the payment
+platform the user can do a final review of the invoice before it gets approved.
+
+It goes through the following steps:
+
+. Setup the authorization flow (`SetupAuthorization` method)
+. User redirection to the payment platform page
+. After user returns from payment platform, approve the authorization (`Authorize` method)
+. Show the full invoice with an approval button to the user.
+. After user has approved, complete the payment (`Capture` method)
+
+
+[#API]
+== API
+
+This microservice exposes the following gRPC endpoints:
+
+[#api_payment]
+=== Payment
+
+A Payment resource.
+
+`io.restorecommerce.payment.SetupRequest`
+
+Sent to the service to initiate a new payment transaction
+
+|===
+|Field |Type |Label |Description
+
+|ip |string |required |IP of the client initiating the payment
+|items |[]`io.restorecommerce.payment.Item` |required |List of items to be paid for
+|subtotal |int32 |required |The subtotal of all items
+|shipping |int32 |required |The cost of shipping
+|handling |int32 |required |The cost of handling
+|tax |int32 |required |The applied tax amount
+|currency |string |required |The currency of the transaction
+|return_url |string |required |The URL the client will be returned to after a successful payment
+|cancel_return_url |string |required |The URL the client will be returned to after a failed payment
+|allow_guest_checkout |bool |required |Whether the payment platform should allow non-registered members to complete the payment
+|provider |`io.restorecommerce.payment.Provider` |required |The payment provider used for this transaction
+|===
+
+`io.restorecommerce.payment.SetupResponse`
+
+Sent as a response to `io.restorecommerce.payment.SetupRequest` with either success or failure
+
+|===
+|Field |Type |Label |Description
+
+|payment_errors |[]`io.restorecommerce.payment.PaymentError` |required |A list of errors that occurred during setup
+|token |string |required |The token for this transaction
+|confirm_initiation_url |string |required |The URL the client needs to visit to complete this transaction
+|initiated_on |string |required |The date and time of the initiation of this transaction
+|===
+
+`io.restorecommerce.payment.PaymentRequest`
+
+Sent to the service to either authorize the transaction or complete the purchase flow
+
+|===
+|Field |Type |Label |Description
+
+|provider |`io.restorecommerce.payment.Provider` |required |The payment provider used for this transaction
+|payment_sum |int32 |required |The total sum of the transaction
+|currency |string |required |The currency of the transaction
+|payment_id |string |required |The ID of the transaction
+|payer_id |string |required |The ID of the client that has confirmed the transaction
+|token |string |required |The token for this transaction
+|===
+
+`io.restorecommerce.payment.CaptureRequest`
+
+Sent to the service to complete the authorization flow
+
+|===
+|Field |Type |Label |Description
+
+|provider |`io.restorecommerce.payment.Provider` |required |The payment provider used for this transaction
+|payment_sum |int32 |required |The total sum of the transaction
+|currency |string |required |The currency of the transaction
+|payment_id |string |required |The ID of the transaction
+|===
+
+`io.restorecommerce.payment.PaymentResponse`
+
+Sent as a response to `io.restorecommerce.payment.PaymentResponse` or `io.restorecommerce.payment.CaptureRequest` with either success or failure
+
+|===
+|Field |Type |Label |Description
+
+|payment_errors |[]`io.restorecommerce.payment.PaymentError` |required |A list of errors that occurred during setup
+|payment_id |string |required |The ID of the transaction
+|executed_on |string |required |The date and time of the execution of this transaction
+|===
+
+`io.restorecommerce.payment.Item`
+
+|===
+|Field |Type |Label |Description
+
+|name |string |required |The name of this item
+|description |string |required |The description of this item
+|quantity |int32 |required |The quantity of the item
+|amount |int32 |required |The price of a single item
+|===
+
+`io.restorecommerce.payment.PaymentError`
+
+|===
+|Field |Type |Label |Description
+
+|killed |boolean |required |Whether the payment process was killed
+|code |int32 |required |The exit code of the payment process
+|signal |string |required |???
+|cmd |string |required |The command executed for the payment
+|stdout |string |required |The stdout of the command
+|stderr |string |required |The stderr of the command
+|===
+
+`io.restorecommerce.payment.Provider`
+
+|===
+|Field |Value |Description
+
+|NO_PROVIDER |0 |Do not use a payment provider
+|PaypalExpressGateway |1 |Use PayPal Express payment provider
+|AuthorizeNetGateway |2 |Use Authorize.Net payment provider
+|===
+
+[#api_payment_crud]
+==== CRUD Operations
+
+The microservice exposes the below CRUD operations for creating or modifying Payment resources.
+
+`io.restorecommerce.payment.Service`
+
+|===
+|Method Name |Request Type |Response Type |Description
+
+|SetupAuthorization |`io.restorecommerce.payment.SetupRequest` |`io.restorecommerce.payment.SetupResponse` |Setup a new authorization flow style payment
+|SetupPurchase |`io.restorecommerce.payment.SetupRequest` |`io.restorecommerce.payment.SetupResponse` |Setup a new payment flow style payment
+|Authorize |`io.restorecommerce.payment.PaymentRequest` |`io.restorecommerce.payment.PaymentResponse` |Authorize a payment to be captured
+|Purchase |`io.restorecommerce.payment.PaymentRequest` |`io.restorecommerce.payment.PaymentResponse` |Complete a purchase
+|Capture |`io.restorecommerce.payment.CaptureRequest` |`io.restorecommerce.payment.PaymentResponse` |Capture an authorized payment
+|===
+
+[#events]
+== Events
+
+[#consumed-events]
+=== Consumed
+
+This microservice consumes messages for the following events by topic:
+
+|===
+|Topic Name |Event Name |Description
+
+|`io.restorecommerce.command` |`restoreCommand` |used for system restore
+| |`resetCommand` |used for system reset
+| |`healthCheckCommand` |to get system health check
+| |`versionCommand` |to get system version
+|===

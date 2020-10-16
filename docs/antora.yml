@@ -1,0 +1,5 @@
+name: payment-srv
+title: Payment Service
+version: master
+nav:
+  - modules/ROOT/nav.adoc

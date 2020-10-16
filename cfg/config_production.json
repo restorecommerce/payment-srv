@@ -1,0 +1,19 @@
+{
+  "logger": {
+    "elasticsearch": {
+      "level": "info",
+      "clientOpts": {
+        "node": "http://localhost:9200"
+      },
+      "source": "payment-srv"
+    }
+  },
+  "redis": {
+    "host": "localhost"
+  },
+  "events": {
+    "kafka": {
+      "kafkaHost": "localhost:29092"
+    }
+  }
+}

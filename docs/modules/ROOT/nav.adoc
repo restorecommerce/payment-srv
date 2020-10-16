@@ -1,0 +1,18 @@
+// INDEX
+* xref:index.adoc[Payment Service]
+
+// FEATURES
+* xref:index.adoc#features[Features]
+// CONFIGURATION
+* xref:index.adoc#configuration[Configuration]
+** xref:index.adoc#configuration_purchase_flow[Purchase flow]
+** xref:index.adoc#configuration_authorization_flow[Authorization Flow]
+
+// API
+* xref:index.adoc#API[API]
+** xref:index.adoc#api_payment[Payment]
+*** xref:index.adoc#api_payment_crud[CRUD Operations]
+
+// EVENTS
+* xref:index.adoc#events[Events]
+** xref:index.adoc#consumed-events[Consumed]

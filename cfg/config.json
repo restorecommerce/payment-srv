@@ -1,0 +1,222 @@
+{
+  "redis": {
+    "host": "localhost",
+    "port": 6379,
+    "offsetStoreInterval": 1000,
+    "db-indexes": {
+      "db-offsetStore": 0,
+      "db-subject": 4
+    }
+  },
+  "payments": {
+    "default_currency": "EUR",
+    "confirm_return_url": "http://127.0.0.1:5000/Rcpg/PayCardless",
+    "cancelled_return_url": "http://127.0.0.1:5000/Rcpg/CanceledReturn"
+  },
+  "client": {
+    "payment-srv": {
+      "transports": {
+        "grpc": {
+          "service": "io.restorecommerce.payment.Service",
+          "protos": [
+            "io/restorecommerce/payment.proto"
+          ],
+          "protoRoot": "node_modules/@restorecommerce/protos/",
+          "timeout": 3000
+        }
+      },
+      "loadbalancer": {
+        "name": "roundRobin"
+      },
+      "publisher": {
+        "name": "static",
+        "instances": [
+          "grpc://localhost:50078"
+        ]
+      },
+      "endpoints": {
+        "SetupAuthorization": {},
+        "SetupPurchase": {},
+        "Authorize": {},
+        "Purchase": {},
+        "Capture": {},
+        "AuthorizePaypalJava": {},
+        "OrderPaypalJava": {},
+        "SalePaypalJava": {}
+      }
+    }
+  },
+  "events": {
+    "kafka": {
+      "provider": "kafka",
+      "groupId": "restore-payment-srv",
+      "clientId": "restore-payment-srv",
+      "kafkaHost": "localhost:9092",
+      "restoreCommand": {
+        "protos": [
+          "io/restorecommerce/commandinterface.proto"
+        ],
+        "protoRoot": "node_modules/@restorecommerce/protos/",
+        "messageObject": "io.restorecommerce.commandinterface.CommandRequest"
+      },
+      "restoreResponse": {
+        "protos": [
+          "io/restorecommerce/commandinterface.proto"
+        ],
+        "protoRoot": "node_modules/@restorecommerce/protos/",
+        "messageObject": "io.restorecommerce.commandinterface.CommandResponse"
+      },
+      "healthCheckCommand": {
+        "protos": [
+          "io/restorecommerce/commandinterface.proto"
+        ],
+        "protoRoot": "node_modules/@restorecommerce/protos/",
+        "messageObject": "io.restorecommerce.commandinterface.CommandRequest"
+      },
+      "healthCheckResponse": {
+        "protos": [
+          "io/restorecommerce/commandinterface.proto"
+        ],
+        "protoRoot": "node_modules/@restorecommerce/protos/",
+        "messageObject": "io.restorecommerce.commandinterface.CommandResponse"
+      },
+      "versionCommand": {
+        "protos": [
+          "io/restorecommerce/commandinterface.proto"
+        ],
+        "protoRoot": "node_modules/@restorecommerce/protos/",
+        "messageObject": "io.restorecommerce.commandinterface.CommandRequest"
+      },
+      "versionResponse": {
+        "protos": [
+          "io/restorecommerce/commandinterface.proto"
+        ],
+        "protoRoot": "node_modules/@restorecommerce/protos/",
+        "messageObject": "io.restorecommerce.commandinterface.CommandResponse"
+      },
+      "resetCommand": {
+        "protos": [
+          "io/restorecommerce/commandinterface.proto"
+        ],
+        "protoRoot": "node_modules/@restorecommerce/protos/",
+        "messageObject": "io.restorecommerce.commandinterface.CommandRequest"
+      },
+      "resetResponse": {
+        "protos": [
+          "io/restorecommerce/commandinterface.proto"
+        ],
+        "protoRoot": "node_modules/@restorecommerce/protos/",
+        "messageObject": "io.restorecommerce.commandinterface.CommandResponse"
+      },
+      "topics": {
+        "command": {
+          "topic": "io.restorecommerce.command",
+          "events": [
+            "healthCheckCommand",
+            "restoreCommand",
+            "resetCommand",
+            "versionCommand"
+          ]
+        }
+      }
+    }
+  },
+  "server": {
+    "services": {
+      "io-restorecommerce-payment-srv": {
+        "SetupAuthorization": {
+          "transport": [
+            "grpcPayment"
+          ]
+        },
+        "SetupPurchase": {
+          "transport": [
+            "grpcPayment"
+          ]
+        },
+        "Authorize": {
+          "transport": [
+            "grpcPayment"
+          ]
+        },
+        "Purchase": {
+          "transport": [
+            "grpcPayment"
+          ]
+        },
+        "Capture": {
+          "transport": [
+            "grpcPayment"
+          ]
+        },
+        "AuthorizePaypalJava": {
+          "transport": [
+            "grpcPayment"
+          ]
+        },
+        "OrderPaypalJava": {
+          "transport": [
+            "grpcPayment"
+          ]
+        },
+        "SalePaypalJava": {
+          "transport": [
+            "grpcPayment"
+          ]
+        }
+      },
+      "io-restorecommerce-payment-reflection": {
+        "serverReflectionInfo": {
+          "transport": [
+            "grpcPayment"
+          ]
+        }
+      },
+      "io-restorecommerce-payment-cis": {
+        "command": {
+          "transport": [
+            "grpcPayment"
+          ]
+        }
+      },
+      "grpc-health-v1": {
+        "check": {
+          "transport": [
+            "grpcPayment"
+          ]
+        },
+        "watch": {
+          "transport": [
+            "grpcPayment"
+          ]
+        }
+      }
+    },
+    "transports": [
+      {
+        "name": "grpcPayment",
+        "provider": "grpc",
+        "services": {
+          "io-restorecommerce-payment-srv": "io.restorecommerce.payment.Service",
+          "io-restorecommerce-payment-reflection": "grpc.reflection.v1alpha.ServerReflection",
+          "io-restorecommerce-payment-cis": "io.restorecommerce.commandinterface.Service",
+          "grpc-health-v1": "grpc.health.v1.Health"
+        },
+        "protos": [
+          "io/restorecommerce/payment.proto",
+          "grpc/reflection/v1alpha/reflection.proto",
+          "io/restorecommerce/commandinterface.proto",
+          "grpc/health/v1/health.proto"
+        ],
+        "protoRoot": "node_modules/@restorecommerce/protos/",
+        "addr": "0.0.0.0:50078"
+      }
+    ]
+  },
+  "serviceNames": {
+    "payment": "io-restorecommerce-payment-srv",
+    "reflection": "io-restorecommerce-payment-reflection",
+    "cis": "io-restorecommerce-payment-cis",
+    "health":  "grpc-health-v1"
+  }
+}
