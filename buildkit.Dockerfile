@@ -30,10 +30,8 @@ FROM base as deployment
 
 RUN npm ci # Currently Errors: --only=production
 
-COPY scripts $APP_HOME/scripts
-COPY setupTopics.js $APP_HOME/setupTopics.js
-COPY cfg $APP_HOME/cfg
-COPY --from=build $APP_HOME/lib $APP_HOME/lib
+COPY --chown=node:node . $APP_HOME
+COPY --chown=node:node --from=build $APP_HOME/lib $APP_HOME/lib
 
 EXPOSE 50051
 
