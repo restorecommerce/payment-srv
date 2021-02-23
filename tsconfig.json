@@ -9,7 +9,7 @@
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
     "noUnusedLocals": false,
-    "skipLibCheck": false,
+    "skipLibCheck": true,
     "strict": false, // temporarily disabled for testing by TH
     "outDir": "lib",
     "typeRoots": [
