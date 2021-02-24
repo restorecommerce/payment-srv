@@ -21,9 +21,9 @@
     "@restorecommerce/cluster-service": "^0.1.4",
     "@restorecommerce/grpc-client": "^0.0.9",
     "@restorecommerce/kafka-client": "^0.1.13",
-    "@restorecommerce/logger": "^0.5.4",
+    "@restorecommerce/logger": "^0.6.1",
     "@restorecommerce/protos": "^0.0.20",
-    "@restorecommerce/service-config": "^0.3.4",
+    "@restorecommerce/service-config": "^0.4.1",
     "child_process": "^1.0.2",
     "redis": "^3.0.2",
     "util": "^0.12.3"
