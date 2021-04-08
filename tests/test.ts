@@ -54,7 +54,10 @@ describe('testing payment-srv', () => {
   before(async () => {
     await start();
     paymentService = await connect('client:payment-srv', '');
-    browser = await puppeteer.launch({headless: true});
+    browser = await puppeteer.launch({
+      headless: true,
+      args: ['--lang=en-US,en']
+    });
   });
 
   after(async () => {
@@ -189,7 +192,31 @@ async function PayForURL(url: string): Promise<string> {
       loginButton = await page.waitForXPath('//button[contains(translate(., "LOGIN", "login"),"log in")]', {
         timeout: 15000
       });
-    }catch (e) {
+    } catch (e) {
+      logger.warn("Login button not found");
+
+      try {
+        await page.select('#languageSelector', 'zh');
+        await page.waitForTimeout(5000);
+        await page.select('#languageSelector', 'en');
+        await page.waitForTimeout(5000);
+
+        try {
+          loginButton = await page.waitForXPath('//button[contains(translate(., "LOGIN", "login"),"log in")]', {
+            timeout: 15000
+          });
+        } catch (e){
+        }
+      } catch (e) {
+        logger.warn("Language selector not found");
+        try {
+          loginButton = await page.waitForXPath('//div[contains(@class, \'baslLoginButtonContainer\')]', {
+            timeout: 5000
+          })
+        } catch (e) {
+          logger.warn("Anchor login button not found");
+        }
+      }
     }
 
     if (loginButton === null) {
