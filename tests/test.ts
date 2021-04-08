@@ -186,7 +186,7 @@ async function PayForURL(url: string): Promise<string> {
 
     let loginButton = null;
     try {
-      loginButton = await page.waitForSelector('#loginSection div.baslLoginButtonContainer a', {
+      loginButton = await page.waitForXPath('//button[contains(translate(., "LOGIN", "login"),"log in")]', {
         timeout: 15000
       });
     }catch (e) {
@@ -198,12 +198,6 @@ async function PayForURL(url: string): Promise<string> {
     }
 
     logger.info("Login button found");
-
-    // Wait for animation
-    await page.waitFor(2500);
-    logger.info("Approving Cookies");
-    await page.click('#acceptAllButton');
-
     await loginButton.click();
 
     logger.info("Waiting for Email");
@@ -215,7 +209,7 @@ async function PayForURL(url: string): Promise<string> {
     await emailContinue.click();
 
     // Wait for animation
-    await page.waitFor(2500);
+    await page.waitForTimeout(5000);
 
     logger.info("Waiting for Password");
     const passwordInput = await page.waitForSelector('#splitPassword #password');
@@ -226,12 +220,23 @@ async function PayForURL(url: string): Promise<string> {
     await login.click();
 
     // Wait for navigation
-    await page.waitForNavigation();
+    await page.waitForNavigation({
+      timeout: 120000
+    });
 
     logger.info("Waiting for Reviewing Payment");
-    const reviewButton = await page.waitForSelector('button#payment-submit-btn');
+    const reviewButton = await page.waitForSelector('button#payment-submit-btn', {
+      timeout: 300000
+    });
     logger.info("Reviewing Payment");
-    await page.waitFor(10000);
+    await page.waitForTimeout(10000);
+
+    await page.evaluate(() => {
+      document.querySelector('button#payment-submit-btn').scrollIntoView();
+    });
+
+    await page.waitForTimeout(10000);
+
     await reviewButton.click();
 
     logger.info("Waiting for redirect");

@@ -51,7 +51,7 @@
       "provider": "kafka",
       "groupId": "restore-payment-srv",
       "clientId": "restore-payment-srv",
-      "kafkaHost": "localhost:9092",
+      "kafkaHost": "localhost:29092",
       "restoreCommand": {
         "protos": [
           "io/restorecommerce/commandinterface.proto"

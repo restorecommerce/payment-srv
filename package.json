@@ -66,9 +66,10 @@
     "tsdev:nocluster": "ts-node-dev --no-notify --respawn --transpileOnly ./src/worker.ts",
     "pretest": "npm run build && npm run tsctests && npm run createtopics",
     "tsctests": "tsc -d -p tsconfig.test.json",
-    "test": "npm run pretest && npm run mocha",
+    "test": "npm run pretest && nyc npm run mocha",
     "mocha": "cross-env NODE_ENV=test mocha --timeout 15000 -R spec tests/test.js --full-trace --exit",
-    "createtopics": "node setupTopics.js io.restorecommerce.command"
+    "createtopics": "node setupTopics.js io.restorecommerce.command",
+    "lcov-report": "nyc report --reporter=lcov"
   },
   "engines": {
     "node": ">= 10.0.0"
