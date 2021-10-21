@@ -25,7 +25,6 @@ COPY --chown=node:node . .
 
 RUN npm run build
 
-
 ### Deployment
 FROM base as deployment
 
