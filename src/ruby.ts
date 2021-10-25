@@ -1,4 +1,4 @@
-import { Provider, OperationStatus, SetupPayloadStatus, PaymentPayloadStatus } from './grpc_types';
+import { Provider, OperationStatus, SetupPayloadStatus, PaymentPayloadStatus, Status } from './grpc_types';
 import { spawn } from 'child_process';
 import logger from './logger';
 import { PaymentService } from './service';
@@ -51,6 +51,7 @@ export class RubyExecutor {
 
       rubyRunner.on('close', () => {
         let response: any = {};
+        let status: Status = { id: '', code: 0, message: '' };
         let operation_status: OperationStatus = { code: 0, message: '' };
 
         if (stderr !== '') {
@@ -64,27 +65,22 @@ export class RubyExecutor {
           response = JSON.parse(stdout.trim());
 
           if (response && response.error) {
-            operation_status.code = 500;
-            operation_status.message = response.error;
+            status.code = 500;
+            status.message = response.error;
           } else {
-            operation_status.code = 200;
-            operation_status.message = 'success';
+            status.code = 200;
+            status.message = 'success';
           }
         }
         let item = {
           payload: response,
-          status: {
-            code: 0,
-            message: ''
-          }
+          status
         };
 
-        if (operation_status && operation_status.message) {
-          item.status = {
-            code: operation_status.code,
-            message: operation_status.message
-          };
-        }
+        operation_status = {
+          code: 200,
+          message: 'success'
+        };
 
         resolve({
           item,
