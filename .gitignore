@@ -12,6 +12,10 @@ node_modules/
 .idea/
 .vscode
 
+login.png
+password.png
+email.png
+
 /lib
 /.nyc_output
 

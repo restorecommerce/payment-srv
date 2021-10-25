@@ -54,10 +54,7 @@ describe('testing payment-srv', () => {
   before(async () => {
     await start();
     paymentService = await connect('client:payment-srv', '');
-    browser = await puppeteer.launch({
-      headless: true,
-      args: ['--lang=en-US,en']
-    });
+    // browser = await puppeteer.launch({ headless: false });
   });
 
   after(async () => {
@@ -86,7 +83,6 @@ describe('testing payment-srv', () => {
     it('should be able to authorize payment from user browser', async function () {
       // PayPal sandbox is extremely slow
       this.timeout(300000);
-
       payerId = await PayForURL(url);
     });
 
@@ -170,8 +166,8 @@ describe('testing payment-srv', () => {
  * Go through PP payment process and return the payer ID
  */
 async function PayForURL(url: string): Promise<string> {
-  const context = await browser.createIncognitoBrowserContext();
-  const page = await context.newPage();
+  const browser = await puppeteer.launch({ headless: true, args: ['--lang=en-US,en'] });
+  const page = await browser.newPage();
 
   logger.info("Opening: " + url);
 
@@ -210,6 +206,7 @@ async function PayForURL(url: string): Promise<string> {
       } catch (e) {
         logger.warn("Language selector not found");
         try {
+          await page.screenshot({ path: 'login.png' });
           loginButton = await page.waitForXPath('//div[contains(@class, \'baslLoginButtonContainer\')]', {
             timeout: 5000
           })
@@ -227,6 +224,7 @@ async function PayForURL(url: string): Promise<string> {
     logger.info("Login button found");
     await loginButton.click();
 
+    await page.screenshot({ path: 'email.png' });
     logger.info("Waiting for Email");
     const emailInput = await page.waitForSelector('#splitEmail #email');
     logger.info("Entering Email");
@@ -238,6 +236,7 @@ async function PayForURL(url: string): Promise<string> {
     // Wait for animation
     await page.waitForTimeout(5000);
 
+    await page.screenshot({ path: 'password.png' });
     logger.info("Waiting for Password");
     const passwordInput = await page.waitForSelector('#splitPassword #password');
     logger.info("Entering Password");
@@ -248,7 +247,7 @@ async function PayForURL(url: string): Promise<string> {
 
     // Wait for navigation
     await page.waitForNavigation({
-      timeout: 120000
+      timeout: 180000
     });
 
     logger.info("Waiting for Reviewing Payment");
@@ -279,7 +278,7 @@ async function PayForURL(url: string): Promise<string> {
 
   logger.info("Received Payer ID: " + payerId);
 
-  await context.close();
+  await browser.close();
 
   server.close();
 

@@ -71,7 +71,7 @@ export class RubyExecutor {
         if (stdout !== '') {
           response = JSON.parse(stdout.trim());
 
-          if (response.error) {
+          if (response && response.error) {
             errors.push({
               code: 0,
               killed: false,
