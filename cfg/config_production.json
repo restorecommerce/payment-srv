@@ -14,17 +14,16 @@
   },
   "events": {
     "kafka": {
-      "kafkaHost": "kafka:9092"
+      "kafka": {
+        "brokers": [
+          "kafka:9092"
+        ]
+      }
     }
   },
   "client": {
     "payment-srv": {
-      "publisher": {
-        "name": "static",
-        "instances": [
-          "grpc://payment-srv:50051"
-        ]
-      }
+      "address": "payment-srv:50051"
     }
   },
   "server": {

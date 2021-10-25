@@ -15,34 +15,16 @@
   },
   "client": {
     "payment-srv": {
-      "transports": {
-        "grpc": {
-          "service": "io.restorecommerce.payment.Service",
-          "protos": [
-            "io/restorecommerce/payment.proto"
-          ],
-          "protoRoot": "node_modules/@restorecommerce/protos/",
-          "timeout": 3000
+      "address": "localhost:50078",
+      "proto": {
+        "protoRoot": "node_modules/@restorecommerce/protos/",
+        "protoPath": "io/restorecommerce/payment.proto",
+        "services": {
+          "payment-srv": {
+            "packageName": "io.restorecommerce.payment",
+            "serviceName": "Service"
+          }
         }
-      },
-      "loadbalancer": {
-        "name": "roundRobin"
-      },
-      "publisher": {
-        "name": "static",
-        "instances": [
-          "grpc://localhost:50078"
-        ]
-      },
-      "endpoints": {
-        "SetupAuthorization": {},
-        "SetupPurchase": {},
-        "Authorize": {},
-        "Purchase": {},
-        "Capture": {},
-        "AuthorizePaypalJava": {},
-        "OrderPaypalJava": {},
-        "SalePaypalJava": {}
       }
     }
   },
@@ -51,7 +33,12 @@
       "provider": "kafka",
       "groupId": "restore-payment-srv",
       "clientId": "restore-payment-srv",
-      "kafkaHost": "localhost:29092",
+      "kafka": {
+        "clientId": "restore-payment-srv",
+        "brokers": [
+          "localhost:29092"
+        ]
+      },
       "restoreCommand": {
         "protos": [
           "io/restorecommerce/commandinterface.proto"

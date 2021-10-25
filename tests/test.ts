@@ -2,7 +2,7 @@ import * as should from 'should';
 import { Worker } from '../lib/worker';
 import logger from '../lib/logger';
 import { cfg } from '../lib/config';
-import * as grpcClient from '@restorecommerce/grpc-client';
+import { GrpcClient } from '@restorecommerce/grpc-client';
 import * as kafkaClient from '@restorecommerce/kafka-client';
 import * as puppeteer from 'puppeteer';
 import * as express from 'express';
@@ -17,10 +17,10 @@ let browser;
 
 const total = 100;
 const currency = 'USD';
-const provider = 96; // PayPalExpressCheckout
+const provider = 'PayPalExpressCheckout'; // PayPalExpressCheckout
 const setupAuthorizationCall = {
   ip: '1.2.3.4',
-  items: [{name: 'sample', quantity: 1, amount: total, description: 'desc'}],
+  items: [{ name: 'sample', quantity: 1, amount: total, description: 'desc' }],
   subtotal: total,
   shipping: 0,
   handling: 0,
@@ -43,18 +43,14 @@ async function connect(clientCfg: string, resourceName: string): Promise<any> { 
   events = new Events(cfg.get('events:kafka'), logger);
   await (events.start());
 
-  client = new grpcClient.Client(cfg.get(clientCfg), logger);
-
-  return new Promise((resolve, reject) => {
-    client.connect().then(resolve, reject).catch(reject);
-  });
+  client = new GrpcClient(cfg.get(clientCfg), logger);
+  return client['payment-srv'];
 }
 
 describe('testing payment-srv', () => {
   before(async () => {
     await start();
     paymentService = await connect('client:payment-srv', '');
-    // browser = await puppeteer.launch({ headless: false });
   });
 
   after(async () => {
@@ -68,16 +64,14 @@ describe('testing payment-srv', () => {
     let paymentId: string;
 
     it('should get url from SetupAuthorization', async () => {
-      const result = await paymentService.SetupAuthorization(setupAuthorizationCall);
-
-      should(result.error).be.null();
-      should(result.data).not.be.null();
-      should(result.data.payment_errors).be.empty();
-      should(result.data.confirm_initiation_url).not.be.null();
-      should(result.data.token).not.be.null();
-
-      token = result.data.token;
-      url = result.data.confirm_initiation_url;
+      const result = await paymentService.setupAuthorization(setupAuthorizationCall);
+      should.exist(result.item.payload);
+      should(result.item.payload.token).not.be.null();
+      should(result.item.payload.confirm_initiation_url).not.be.null();
+      result.operation_status.code.should.equal(200);
+      result.operation_status.message.should.equal('success');
+      token = result.item.payload.token;
+      url = result.item.payload.confirm_initiation_url;
     });
 
     it('should be able to authorize payment from user browser', async function () {
@@ -87,7 +81,7 @@ describe('testing payment-srv', () => {
     });
 
     it('should get paymentId from Authorize', async () => {
-      const result = await paymentService.Authorize({
+      const result = await paymentService.authorize({
         provider,
         payment_sum: total,
         currency,
@@ -95,27 +89,22 @@ describe('testing payment-srv', () => {
         payer_id: payerId,
         token: token
       });
-
-      should(result.error).be.null();
-      should(result.data).not.be.null();
-      should(result.data.payment_errors).be.empty();
-      should(result.data.payment_id).not.be.null();
-      should(result.data.payment_id).not.be.empty();
-
-      paymentId = result.data.payment_id;
+      should.exist(result.item.payload);
+      should(result.item.payload.payment_id).not.be.null();
+      result.operation_status.code.should.equal(200);
+      result.operation_status.message.should.equal('success');
+      paymentId = result.item.payload.payment_id;
     });
 
     it('should Capture', async () => {
-      const result = await paymentService.Capture({
+      const result = await paymentService.capture({
         provider,
         payment_sum: total,
         currency,
         payment_id: paymentId
       });
-
-      should(result.error).be.null();
-      should(result.data).not.be.null();
-      should(result.data.payment_errors).be.empty();
+      result.operation_status.code.should.equal(200);
+      result.operation_status.message.should.equal('success');
     });
   });
 
@@ -125,27 +114,26 @@ describe('testing payment-srv', () => {
     let payerId: string;
 
     it('should get url from SetupPurchase', async () => {
-      const result = await paymentService.SetupPurchase(setupAuthorizationCall);
+      const result = await paymentService.setupPurchase(setupAuthorizationCall);
 
-      should(result.error).be.null();
-      should(result.data).not.be.null();
-      should(result.data.payment_errors).be.empty();
-      should(result.data.confirm_initiation_url).not.be.null();
-      should(result.data.token).not.be.null();
+      should.exist(result.item.payload);
+      should(result.item.payload.token).not.be.null();
+      should(result.item.payload.confirm_initiation_url).not.be.null();
+      result.operation_status.code.should.equal(200);
+      result.operation_status.message.should.equal('success');
 
-      token = result.data.token;
-      url = result.data.confirm_initiation_url;
+      token = result.item.payload.token;
+      url = result.item.payload.confirm_initiation_url;
     });
 
     it('should be able to authorize payment from user browser', async function () {
       // PayPal sandbox is extremely slow
       this.timeout(300000);
-
       payerId = await PayForURL(url);
     });
 
     it('should get paymentId from Purchase', async () => {
-      const result = await paymentService.Purchase({
+      const result = await paymentService.purchase({
         provider,
         payment_sum: total,
         currency,
@@ -153,11 +141,11 @@ describe('testing payment-srv', () => {
         token: token
       });
 
-      should(result.error).be.null();
-      should(result.data).not.be.null();
-      should(result.data.payment_errors).be.empty();
-      should(result.data.payment_id).not.be.null();
-      should(result.data.payment_id).not.be.empty();
+      should.exist(result.item.payload);
+      should(result.item.payload.payment_id).not.be.null();
+      should(result.item.payload.payment_id).not.be.empty();
+      result.operation_status.code.should.equal(200);
+      result.operation_status.message.should.equal('success');
     });
   });
 });
@@ -176,7 +164,7 @@ async function PayForURL(url: string): Promise<string> {
   app.get('/cancel', (req, res) => res.send('cancel'));
   const server = app.listen(61234);
 
-  while(true) {
+  while (true) {
     await page.goto(url, {
       timeout: 60000
     });
@@ -201,7 +189,7 @@ async function PayForURL(url: string): Promise<string> {
           loginButton = await page.waitForXPath('//button[contains(translate(., "LOGIN", "login"),"log in")]', {
             timeout: 15000
           });
-        } catch (e){
+        } catch (e) {
         }
       } catch (e) {
         logger.warn("Language selector not found");

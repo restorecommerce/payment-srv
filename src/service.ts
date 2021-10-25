@@ -5,7 +5,8 @@ import {
   SetupRequest,
   SetupResponse,
   PaymentRequest,
-  PaymentResponse
+  PaymentResponse,
+  PaymentPayloadStatus
 } from './grpc_types';
 
 export class PaymentService {
@@ -54,11 +55,7 @@ export class PaymentService {
       call.request.payment_id
     ]);
 
-    return {
-      payment_errors: result.errors,
-      payment_id: call.request.payment_id,
-      executed_on: (new Date()).toString()
-    };
+    return result;
   }
 
   private async SetupGeneric(call: Call<SetupRequest>, script: string, context?: any): Promise<SetupResponse> {
@@ -75,19 +72,17 @@ export class PaymentService {
       call.request.items,
     ]);
 
-    let paymentUrl;
-    let token;
-    if (result.response && result.response.data) {
-      paymentUrl = result.response.data.url;
-      token = result.response.data.token;
+    // map url to confirmation_initiation_url in response message
+    if (result?.item?.payload?.data) {
+      if (result?.item?.payload?.data?.url) {
+        result.item.payload.data.confirm_initiation_url = result.item.payload.data.url;
+        delete result.item.payload.data.url;
+        result.item.payload.data.initiated_on = (new Date()).toString();
+      }
+      result.item.payload = result.item.payload.data;
+      delete result.item.payload.data;
     }
-
-    return {
-      payment_errors: result.errors,
-      token,
-      confirm_initiation_url: paymentUrl,
-      initiated_on: (new Date()).toString()
-    };
+    return result;
   }
 
   private async ProcessGeneric(call: Call<PaymentRequest>, script: string, context?: any): Promise<PaymentResponse> {
@@ -98,16 +93,17 @@ export class PaymentService {
       call.request.token,
     ]);
 
-    let transactionId;
-    if (result.response && result.response.data) {
-      transactionId = result.response.data.transaction_id;
+    // map transaction_id to payment_id in response message
+    if (result?.item?.payload?.data) {
+      if (result?.item?.payload?.data?.transaction_id) {
+        result.item.payload.data.payment_id = result.item.payload.data.transaction_id;
+        delete result.item.payload.data.transaction_id;
+        result.item.payload.data.executed_on = (new Date()).toString();
+      }
+      result.item.payload = result.item.payload.data;
+      delete result.item.payload.data;
     }
-
-    return {
-      payment_errors: result.errors,
-      payment_id: transactionId,
-      executed_on: (new Date()).toString()
-    };
+    return result;
   }
 
 }

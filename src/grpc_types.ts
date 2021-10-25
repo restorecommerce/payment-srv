@@ -12,11 +12,31 @@ export interface SetupRequest {
   provider: Provider;
 }
 
-export interface SetupResponse {
-  payment_errors: PaymentError[];
+export interface Status {
+  id: string;
+  code: number;
+  message: string;
+}
+
+export interface OperationStatus {
+  code: number;
+  message: string;
+}
+
+export interface SetupPayload {
   token: string;
   confirm_initiation_url: string;
   initiated_on: string;
+}
+
+export interface SetupPayloadStatus {
+  payload: SetupPayload;
+  status: Status;
+}
+
+export interface SetupResponse {
+  item?: SetupPayloadStatus;
+  operation_status: OperationStatus;
 }
 
 export interface PaymentRequest {
@@ -35,10 +55,19 @@ export interface CaptureRequest {
   payment_id: string;
 }
 
-export interface PaymentResponse {
-  payment_errors: PaymentError[];
+export interface PaymentPayload {
   payment_id: string;
   executed_on: string;
+}
+
+export interface PaymentPayloadStatus {
+  payload: PaymentPayload;
+  status: Status;
+}
+
+export interface PaymentResponse {
+  item?: PaymentPayloadStatus;
+  operation_status: OperationStatus;
 }
 
 export interface PaymentCard {
@@ -55,15 +84,6 @@ export interface Item {
   description: string;
   quantity: number;
   amount: number;
-}
-
-export interface PaymentError {
-  killed: boolean;
-  code: number;
-  signal: string;
-  cmd: string;
-  stdout: string;
-  stderr: string;
 }
 
 export enum Provider {
