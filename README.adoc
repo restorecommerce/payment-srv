@@ -1,8 +1,8 @@
 = Payment Service
 
 https://travis-ci.org/restorecommerce/payment-srv?branch=master[image:https://img.shields.io/travis/restorecommerce/payment-srv/master.svg?style=flat-square[Build Status]]
-https://david-dm.org/restorecommerce/payment-srv[image:https://img.shields.io/david/restorecommerce/payment-srv.svg?style=flat-square[Dependencies]]
-https://coveralls.io/github/restorecommerce/payment-srv?branch=master[image:https://img.shields.io/coveralls/restorecommerce/payment-srv/master.svg?style=flat-square[Coverage Status]]
+https://depfu.com/repos/github/restorecommerce/payment-srv?branch=master[image:https://img.shields.io/depfu/dependencies/github/restorecommerce/payment-srv?style=flat-square[Dependencies]]
+https://coveralls.io/github/restorecommerce/payment-srv?branch=master[image:https://img.shields.io/coveralls/github/restorecommerce/payment-srv/master.svg?style=flat-square[Coverage Status]]
 
 A microservice for handling payment authorizations and purchases.
 
