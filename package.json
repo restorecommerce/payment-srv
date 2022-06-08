@@ -17,7 +17,7 @@
     "srv"
   ],
   "dependencies": {
-    "@restorecommerce/chassis-srv": "^0.3.2",
+    "@restorecommerce/chassis-srv": "^0.3.10",
     "@restorecommerce/cluster-service": "^0.1.10",
     "@restorecommerce/grpc-client": "^0.2.10",
     "@restorecommerce/kafka-client": "^0.2.23",
