@@ -1,11 +1,11 @@
-import * as should from 'should';
-import { Worker } from '../lib/worker';
-import logger from '../lib/logger';
-import { cfg } from '../lib/config';
+import should from 'should';
+import { Worker } from '../src/worker';
+import logger from '../src/logger';
+import { cfg } from '../src/config';
 import { GrpcClient } from '@restorecommerce/grpc-client';
 import * as kafkaClient from '@restorecommerce/kafka-client';
-import * as puppeteer from 'puppeteer';
-import * as express from 'express';
+import puppeteer from 'puppeteer';
+import express from 'express';
 
 const Events = kafkaClient.Events;
 
@@ -13,7 +13,6 @@ let worker: Worker;
 let client;
 let events;
 let paymentService;
-let browser;
 
 const total = 100;
 const currency = 'USD';
@@ -30,22 +29,18 @@ const setupAuthorizationCall = {
   provider
 };
 
-async function start(): Promise<void> {
+const start = async (): Promise<void> => {
   worker = new Worker();
   await worker.start();
-}
+};
 
-async function stop(): Promise<void> {
-  await worker.stop();
-}
-
-async function connect(clientCfg: string, resourceName: string): Promise<any> { // returns a gRPC service
+const connect = async (clientCfg: string, resourceName: string): Promise<any> => { // returns a gRPC service
   events = new Events(cfg.get('events:kafka'), logger);
   await (events.start());
 
   client = new GrpcClient(cfg.get(clientCfg), logger);
   return client['payment-srv'];
-}
+};
 
 describe('testing payment-srv', () => {
   before(async () => {
@@ -54,7 +49,7 @@ describe('testing payment-srv', () => {
   });
 
   after(async () => {
-    await stop();
+    await worker.stop();
   });
 
   describe('testing paypal authorization', () => {
@@ -68,6 +63,7 @@ describe('testing payment-srv', () => {
       should.exist(result.item.payload);
       should(result.item.payload.token).not.be.null();
       should(result.item.payload.confirm_initiation_url).not.be.null();
+      should(result.item.payload.confirm_initiation_url.length).greaterThan(0);
       result.operation_status.code.should.equal(200);
       result.operation_status.message.should.equal('success');
       token = result.item.payload.token;
@@ -87,7 +83,7 @@ describe('testing payment-srv', () => {
         currency,
         payment_id: 'UNIT_TEST_PAYMENT',
         payer_id: payerId,
-        token: token
+        token
       });
       should.exist(result.item.payload);
       should(result.item.payload.payment_id).not.be.null();
@@ -138,7 +134,7 @@ describe('testing payment-srv', () => {
         payment_sum: total,
         currency,
         payer_id: payerId,
-        token: token
+        token
       });
 
       should.exist(result.item.payload);
@@ -153,11 +149,11 @@ describe('testing payment-srv', () => {
 /**
  * Go through PP payment process and return the payer ID
  */
-async function PayForURL(url: string): Promise<string> {
+const PayForURL = async (url: string): Promise<string> => {
   const browser = await puppeteer.launch({ headless: true, args: ['--lang=en-US,en'] });
   const page = await browser.newPage();
 
-  logger.info("Opening: " + url);
+  logger.info('Opening: ' + url);
 
   const app = express();
   app.get('/complete', (req, res) => res.send('complete'));
@@ -169,7 +165,7 @@ async function PayForURL(url: string): Promise<string> {
       timeout: 60000
     });
 
-    logger.info("Page Loaded");
+    logger.info('Page Loaded');
 
     let loginButton = null;
     try {
@@ -177,7 +173,7 @@ async function PayForURL(url: string): Promise<string> {
         timeout: 15000
       });
     } catch (e) {
-      logger.warn("Login button not found");
+      logger.warn('Login button not found');
 
       try {
         await page.select('#languageSelector', 'zh');
@@ -192,30 +188,30 @@ async function PayForURL(url: string): Promise<string> {
         } catch (e) {
         }
       } catch (e) {
-        logger.warn("Language selector not found");
+        logger.warn('Language selector not found');
         try {
           await page.screenshot({ path: 'login.png' });
           loginButton = await page.waitForXPath('//div[contains(@class, \'baslLoginButtonContainer\')]', {
             timeout: 5000
-          })
+          });
         } catch (e) {
-          logger.warn("Anchor login button not found");
+          logger.warn('Anchor login button not found');
         }
       }
     }
 
     if (loginButton === null) {
-      logger.info("Reloading: " + url);
+      logger.info('Reloading: ' + url);
       continue;
     }
 
-    logger.info("Login button found");
+    logger.info('Login button found');
     await loginButton.click();
 
     await page.screenshot({ path: 'email.png' });
-    logger.info("Waiting for Email");
+    logger.info('Waiting for Email');
     const emailInput = await page.waitForSelector('#splitEmail #email');
-    logger.info("Entering Email");
+    logger.info('Entering Email');
     await emailInput.type(cfg.get('payments:tests:PayPalExpressCheckout:email'));
 
     const emailContinue = await page.waitForSelector('#splitEmail #btnNext');
@@ -225,9 +221,9 @@ async function PayForURL(url: string): Promise<string> {
     await page.waitForTimeout(5000);
 
     await page.screenshot({ path: 'password.png' });
-    logger.info("Waiting for Password");
+    logger.info('Waiting for Password');
     const passwordInput = await page.waitForSelector('#splitPassword #password');
-    logger.info("Entering Password");
+    logger.info('Entering Password');
     await passwordInput.type(cfg.get('payments:tests:PayPalExpressCheckout:password'));
 
     const login = await page.waitForSelector('#splitPassword #btnLogin');
@@ -238,11 +234,11 @@ async function PayForURL(url: string): Promise<string> {
       timeout: 180000
     });
 
-    logger.info("Waiting for Reviewing Payment");
+    logger.info('Waiting for Reviewing Payment');
     const reviewButton = await page.waitForSelector('button#payment-submit-btn', {
       timeout: 300000
     });
-    logger.info("Reviewing Payment");
+    logger.info('Reviewing Payment');
     await page.waitForTimeout(10000);
 
     await page.evaluate(() => {
@@ -253,22 +249,22 @@ async function PayForURL(url: string): Promise<string> {
 
     await reviewButton.click();
 
-    logger.info("Waiting for redirect");
+    logger.info('Waiting for redirect');
 
     await page.waitForNavigation();
 
-    logger.info("Transaction complete");
+    logger.info('Transaction complete');
 
     break;
   }
 
   const payerId = (new URL(page.url())).searchParams.get('PayerID');
 
-  logger.info("Received Payer ID: " + payerId);
+  logger.info('Received Payer ID: ' + payerId);
 
   await browser.close();
 
   server.close();
 
   return payerId;
-}
+};

@@ -1,12 +1,12 @@
 # syntax = docker/dockerfile:experimental
 
 ### Base
-FROM node:14.15.5-alpine as base
-
-RUN apk add --no-cache git
-
+FROM node:18.2.0-alpine as base
+ENV NO_UPDATE_NOTIFIER=true
 RUN npm install -g npm
 RUN npm install -g typescript@3.4.1
+RUN apk add --no-cache git
+RUN apk add g++ make python3
 
 USER node
 ARG APP_HOME=/home/node/srv
@@ -25,10 +25,11 @@ COPY --chown=node:node . .
 
 RUN npm run build
 
+
 ### Deployment
 FROM base as deployment
 
-RUN npm ci # Currently Errors: --only=production
+RUN npm ci --only=production
 
 COPY --chown=node:node . $APP_HOME
 COPY --chown=node:node --from=build $APP_HOME/lib $APP_HOME/lib

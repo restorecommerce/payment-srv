@@ -20,3 +20,5 @@ email.png
 /.nyc_output
 
 !setupTopics.js
+
+/scripts/.bundle

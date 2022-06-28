@@ -4,7 +4,7 @@ import * as Chassis from '@restorecommerce/chassis-srv';
 import { Events } from '@restorecommerce/kafka-client';
 import { PaymentService } from './service';
 import { PaymentServiceCommandInterface } from './paymentServiceCommandInterface';
-import { RedisClient, createClient } from 'redis';
+import { createClient, RedisClientType } from 'redis';
 
 export class Worker {
 
@@ -12,7 +12,7 @@ export class Worker {
   events: Events;
   offsetStore: Chassis.OffsetStore;
   topics: any;
-  redisClient: RedisClient;
+  redisClient: RedisClientType;
 
   constructor() {
     this.topics = {};
@@ -26,6 +26,7 @@ export class Worker {
     const redisConfig = cfg.get('redis');
     redisConfig.db = cfg.get('redis:db-indexes:db-subject');
     this.redisClient = createClient(redisConfig);
+    await this.redisClient.connect();
 
     const server = new Chassis.Server(cfg.get('server'), logger);
     const pss = new PaymentService(cfg.get('payments'));

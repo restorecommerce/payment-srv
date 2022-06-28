@@ -1,11 +1,11 @@
 import * as chassis from '@restorecommerce/chassis-srv';
 import { Events } from '@restorecommerce/kafka-client';
 import { Unimplemented } from '@restorecommerce/chassis-srv/lib/microservice/errors';
-import { RedisClient } from 'redis';
+import { RedisClientType } from 'redis';
 
 export class PaymentServiceCommandInterface extends chassis.CommandInterface {
 
-  constructor(server: chassis.Server, cfg: any, logger: any, events: Events, redisClient: RedisClient) {
+  constructor(server: chassis.Server, cfg: any, logger: any, events: Events, redisClient: RedisClientType) {
     super(server, cfg, logger, events, redisClient);
   }
 
