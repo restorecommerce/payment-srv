@@ -1,10 +1,24 @@
 import { cfg } from './config';
 import logger from './logger';
 import * as Chassis from '@restorecommerce/chassis-srv';
-import { Events } from '@restorecommerce/kafka-client';
+import { Events, registerProtoMeta } from '@restorecommerce/kafka-client';
 import { PaymentService } from './service';
 import { PaymentServiceCommandInterface } from './paymentServiceCommandInterface';
 import { createClient, RedisClientType } from 'redis';
+import { BindConfig } from '@restorecommerce/chassis-srv/lib/microservice/transport/provider/grpc';
+import { ServiceDefinition as PaymentServiceDefinition, protoMetadata as paymentMeta } from '@restorecommerce/rc-grpc-clients/dist/generated-server/io/restorecommerce/payment';
+import { ServiceDefinition as CommandInterfaceServiceDefinition, protoMetadata as commandInterfaceMeta } from '@restorecommerce/rc-grpc-clients/dist/generated-server/io/restorecommerce/commandinterface';
+import {
+  protoMetadata as reflectionMeta,
+} from '@restorecommerce/rc-grpc-clients/dist/generated-server/grpc/reflection/v1alpha/reflection';
+import { ServerReflectionService } from 'nice-grpc-server-reflection';
+import { HealthDefinition } from '@restorecommerce/rc-grpc-clients/dist/generated-server/grpc/health/v1/health';
+
+registerProtoMeta(
+  paymentMeta,
+  commandInterfaceMeta,
+  reflectionMeta
+);
 
 export class Worker {
 
@@ -55,16 +69,37 @@ export class Worker {
     }
 
     const serviceNamesCfg = cfg.get('serviceNames');
-    await server.bind(serviceNamesCfg.payment, pss);
-    await server.bind(serviceNamesCfg.cis, cis);
+
+    await server.bind(serviceNamesCfg.payment, {
+      service: PaymentServiceDefinition,
+      implementation: pss
+    } as BindConfig<PaymentServiceDefinition>);
+
+    await server.bind(serviceNamesCfg.cis, {
+      service: CommandInterfaceServiceDefinition,
+      implementation: cis
+    } as BindConfig<CommandInterfaceServiceDefinition>);
 
     const reflectionServiceName = serviceNamesCfg.reflection;
     const transportName = cfg.get(`server:services:${reflectionServiceName}:serverReflectionInfo:transport:0`);
     const transport = server.transport[transportName];
-    const reflectionService = new Chassis.grpc.ServerReflection(transport.$builder, server.config);
-    await server.bind(reflectionServiceName, reflectionService);
+    const reflectionService = Chassis.buildReflectionService([
+      { descriptor: paymentMeta.fileDescriptor },
+      { descriptor: commandInterfaceMeta.fileDescriptor }
+    ]);
 
-    await server.bind(serviceNamesCfg.health, new Chassis.Health(cis));
+    await server.bind(reflectionServiceName, {
+      service: ServerReflectionService,
+      implementation: reflectionService
+    });
+
+    await server.bind(serviceNamesCfg.health, {
+      service: HealthDefinition,
+      implementation: new Chassis.Health(cis, {
+        logger,
+        cfg,
+      })
+    } as BindConfig<HealthDefinition>);
 
     // Start server
     await pss.start();

@@ -2,22 +2,29 @@ import should from 'should';
 import { Worker } from '../src/worker';
 import logger from '../src/logger';
 import { cfg } from '../src/config';
-import { GrpcClient } from '@restorecommerce/grpc-client';
+import { createChannel, createClient } from '@restorecommerce/grpc-client';
 import * as kafkaClient from '@restorecommerce/kafka-client';
 import puppeteer from 'puppeteer';
 import express from 'express';
+import {
+  ServiceDefinition,
+  ServiceClient,
+  SetupRequest,
+  Provider
+} from '@restorecommerce/rc-grpc-clients/dist/generated-server/io/restorecommerce/payment';
+import { DeepPartial } from '@restorecommerce/kafka-client/lib/protos';
 
 const Events = kafkaClient.Events;
 
 let worker: Worker;
-let client;
+let channel;
 let events;
-let paymentService;
+let paymentService: ServiceClient;
 
 const total = 100;
 const currency = 'USD';
-const provider = 'PayPalExpressCheckout'; // PayPalExpressCheckout
-const setupAuthorizationCall = {
+const provider = Provider.PayPalExpressCheckout; // PayPalExpressCheckout
+const setupAuthorizationCall: DeepPartial<SetupRequest> = {
   ip: '1.2.3.4',
   items: [{ name: 'sample', quantity: 1, amount: total, description: 'desc' }],
   subtotal: total,
@@ -38,113 +45,12 @@ const connect = async (clientCfg: string, resourceName: string): Promise<any> =>
   events = new Events(cfg.get('events:kafka'), logger);
   await (events.start());
 
-  client = new GrpcClient(cfg.get(clientCfg), logger);
-  return client['payment-srv'];
+  channel = createChannel(cfg.get(clientCfg).address);
+  return createClient({
+    ...cfg.get(clientCfg),
+    logger
+  }, ServiceDefinition, channel);
 };
-
-describe('testing payment-srv', () => {
-  before(async () => {
-    await start();
-    paymentService = await connect('client:payment-srv', '');
-  });
-
-  after(async () => {
-    await worker.stop();
-  });
-
-  describe('testing paypal authorization', () => {
-    let token: string;
-    let url: string;
-    let payerId: string;
-    let paymentId: string;
-
-    it('should get url from SetupAuthorization', async () => {
-      const result = await paymentService.setupAuthorization(setupAuthorizationCall);
-      should.exist(result.item.payload);
-      should(result.item.payload.token).not.be.null();
-      should(result.item.payload.confirm_initiation_url).not.be.null();
-      should(result.item.payload.confirm_initiation_url.length).greaterThan(0);
-      result.operation_status.code.should.equal(200);
-      result.operation_status.message.should.equal('success');
-      token = result.item.payload.token;
-      url = result.item.payload.confirm_initiation_url;
-    });
-
-    it('should be able to authorize payment from user browser', async function () {
-      // PayPal sandbox is extremely slow
-      this.timeout(300000);
-      payerId = await PayForURL(url);
-    });
-
-    it('should get paymentId from Authorize', async () => {
-      const result = await paymentService.authorize({
-        provider,
-        payment_sum: total,
-        currency,
-        payment_id: 'UNIT_TEST_PAYMENT',
-        payer_id: payerId,
-        token
-      });
-      should.exist(result.item.payload);
-      should(result.item.payload.payment_id).not.be.null();
-      result.operation_status.code.should.equal(200);
-      result.operation_status.message.should.equal('success');
-      paymentId = result.item.payload.payment_id;
-    });
-
-    it('should Capture', async () => {
-      const result = await paymentService.capture({
-        provider,
-        payment_sum: total,
-        currency,
-        payment_id: paymentId
-      });
-      result.operation_status.code.should.equal(200);
-      result.operation_status.message.should.equal('success');
-    });
-  });
-
-  describe('testing paypal purchase', () => {
-    let token: string;
-    let url: string;
-    let payerId: string;
-
-    it('should get url from SetupPurchase', async () => {
-      const result = await paymentService.setupPurchase(setupAuthorizationCall);
-
-      should.exist(result.item.payload);
-      should(result.item.payload.token).not.be.null();
-      should(result.item.payload.confirm_initiation_url).not.be.null();
-      result.operation_status.code.should.equal(200);
-      result.operation_status.message.should.equal('success');
-
-      token = result.item.payload.token;
-      url = result.item.payload.confirm_initiation_url;
-    });
-
-    it('should be able to authorize payment from user browser', async function () {
-      // PayPal sandbox is extremely slow
-      this.timeout(300000);
-      payerId = await PayForURL(url);
-    });
-
-    it('should get paymentId from Purchase', async () => {
-      const result = await paymentService.purchase({
-        provider,
-        payment_sum: total,
-        currency,
-        payer_id: payerId,
-        token
-      });
-
-      should.exist(result.item.payload);
-      should(result.item.payload.payment_id).not.be.null();
-      should(result.item.payload.payment_id).not.be.empty();
-      result.operation_status.code.should.equal(200);
-      result.operation_status.message.should.equal('success');
-    });
-  });
-});
 
 /**
  * Go through PP payment process and return the payer ID
@@ -268,3 +174,109 @@ const PayForURL = async (url: string): Promise<string> => {
 
   return payerId;
 };
+
+
+describe('testing payment-srv', () => {
+  before(async () => {
+    await start();
+    paymentService = await connect('client:payment-srv', '');
+  });
+
+  after(async () => {
+    await worker.stop();
+  });
+
+  describe('testing paypal authorization', () => {
+    let token: string;
+    let url: string;
+    let payerId: string;
+    let paymentId: string;
+
+    it('should get url from SetupAuthorization', async () => {
+      const result = await paymentService.setupAuthorization(setupAuthorizationCall);
+      console.log(result);
+      should.exist(result.item.payload);
+      should(result.item.payload.token).not.be.null();
+      should(result.item.payload.confirm_initiation_url).not.be.null();
+      should(result.item.payload.confirm_initiation_url.length).greaterThan(0);
+      result.operation_status.code.should.equal(200);
+      result.operation_status.message.should.equal('success');
+      token = result.item.payload.token;
+      url = result.item.payload.confirm_initiation_url;
+    });
+
+    it('should be able to authorize payment from user browser', async function () {
+      // PayPal sandbox is extremely slow
+      this.timeout(300000);
+      payerId = await PayForURL(url);
+    });
+
+    it('should get paymentId from Authorize', async () => {
+      const result = await paymentService.authorize({
+        provider,
+        payment_sum: total,
+        currency,
+        payment_id: 'UNIT_TEST_PAYMENT',
+        payer_id: payerId,
+        token
+      });
+      should.exist(result.item.payload);
+      should(result.item.payload.payment_id).not.be.null();
+      result.operation_status.code.should.equal(200);
+      result.operation_status.message.should.equal('success');
+      paymentId = result.item.payload.payment_id;
+    });
+
+    it('should Capture', async () => {
+      const result = await paymentService.capture({
+        provider,
+        payment_sum: total,
+        currency,
+        payment_id: paymentId
+      });
+      result.operation_status.code.should.equal(200);
+      result.operation_status.message.should.equal('success');
+    });
+  });
+
+  describe('testing paypal purchase', () => {
+    let token: string;
+    let url: string;
+    let payerId: string;
+
+    it('should get url from SetupPurchase', async () => {
+      const result = await paymentService.setupPurchase(setupAuthorizationCall);
+
+      should.exist(result.item.payload);
+      should(result.item.payload.token).not.be.null();
+      should(result.item.payload.confirm_initiation_url).not.be.null();
+      result.operation_status.code.should.equal(200);
+      result.operation_status.message.should.equal('success');
+
+      token = result.item.payload.token;
+      url = result.item.payload.confirm_initiation_url;
+    });
+
+    it('should be able to authorize payment from user browser', async function () {
+      // PayPal sandbox is extremely slow
+      this.timeout(300000);
+      payerId = await PayForURL(url);
+    });
+
+    it('should get paymentId from Purchase', async () => {
+      const result = await paymentService.purchase({
+        provider,
+        payment_sum: total,
+        currency,
+        payer_id: payerId,
+        token
+      });
+
+      should.exist(result.item.payload);
+      should(result.item.payload.payment_id).not.be.null();
+      should(result.item.payload.payment_id).not.be.empty();
+      result.operation_status.code.should.equal(200);
+      result.operation_status.message.should.equal('success');
+    });
+  });
+});

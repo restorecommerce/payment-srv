@@ -1,18 +1,16 @@
-import { Provider, OperationStatus, SetupPayloadStatus, PaymentPayloadStatus, Status } from './grpc_types';
 import { spawn } from 'child_process';
 import logger from './logger';
 import { PaymentService } from './service';
+import { Provider } from '@restorecommerce/rc-grpc-clients/dist/generated/io/restorecommerce/payment';
+import { parseInt } from 'lodash';
+import { OperationStatus, Status } from '@restorecommerce/rc-grpc-clients/dist/generated/io/restorecommerce/status';
 
 export class RubyExecutor {
 
-  readonly cfg;
-
-  constructor(cfg: { [key: string]: any }) {
-    this.cfg = cfg;
+  constructor(private readonly cfg: { [key: string]: any }) {
   }
 
   async executeRuby(service: PaymentService, script: string, provider: Provider, params: any[]): Promise<{
-    // item?: SetupPayloadStatus | PaymentPayloadStatus;
     item?: any;
     operation_status: OperationStatus;
   }> {
@@ -88,6 +86,6 @@ export class RubyExecutor {
         });
       });
     });
-  };
+  }
 
 }
