@@ -6,8 +6,8 @@ import { PaymentService } from './service';
 import { PaymentServiceCommandInterface } from './paymentServiceCommandInterface';
 import { createClient, RedisClientType } from 'redis';
 import { BindConfig } from '@restorecommerce/chassis-srv/lib/microservice/transport/provider/grpc';
-import { ServiceDefinition as PaymentServiceDefinition, protoMetadata as paymentMeta } from '@restorecommerce/rc-grpc-clients/dist/generated-server/io/restorecommerce/payment';
-import { ServiceDefinition as CommandInterfaceServiceDefinition, protoMetadata as commandInterfaceMeta } from '@restorecommerce/rc-grpc-clients/dist/generated-server/io/restorecommerce/commandinterface';
+import { PaymentServiceDefinition, protoMetadata as paymentMeta } from '@restorecommerce/rc-grpc-clients/dist/generated-server/io/restorecommerce/payment';
+import { CommandInterfaceServiceDefinition, protoMetadata as commandInterfaceMeta } from '@restorecommerce/rc-grpc-clients/dist/generated-server/io/restorecommerce/commandinterface';
 import {
   protoMetadata as reflectionMeta,
 } from '@restorecommerce/rc-grpc-clients/dist/generated-server/grpc/reflection/v1alpha/reflection';

@@ -1,6 +1,6 @@
 import { RubyExecutor } from './ruby';
 import type {
-  ServiceServiceImplementation,
+  PaymentServiceImplementation,
   SetupRequest,
   SetupResponse,
   PaymentRequest,
@@ -9,7 +9,7 @@ import type {
 } from '@restorecommerce/rc-grpc-clients/dist/generated-server/io/restorecommerce/payment';
 import { DeepPartial } from '@restorecommerce/kafka-client/lib/protos';
 
-export class PaymentService implements ServiceServiceImplementation {
+export class PaymentService implements PaymentServiceImplementation {
 
   private readonly DEFAULT_CURRENCY: string;
   private readonly CONFIRM_RETURN_URL: string;

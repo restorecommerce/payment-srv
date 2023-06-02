@@ -7,8 +7,8 @@ import * as kafkaClient from '@restorecommerce/kafka-client';
 import puppeteer from 'puppeteer';
 import express from 'express';
 import {
-  ServiceDefinition,
-  ServiceClient,
+  PaymentServiceDefinition,
+  PaymentServiceClient,
   SetupRequest,
   Provider
 } from '@restorecommerce/rc-grpc-clients/dist/generated-server/io/restorecommerce/payment';
@@ -19,7 +19,7 @@ const Events = kafkaClient.Events;
 let worker: Worker;
 let channel;
 let events;
-let paymentService: ServiceClient;
+let paymentService: PaymentServiceClient;
 
 const total = 100;
 const currency = 'USD';
@@ -49,7 +49,7 @@ const connect = async (clientCfg: string, resourceName: string): Promise<any> =>
   return createClient({
     ...cfg.get(clientCfg),
     logger
-  }, ServiceDefinition, channel);
+  }, PaymentServiceDefinition, channel);
 };
 
 /**
