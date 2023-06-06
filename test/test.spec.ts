@@ -56,7 +56,7 @@ const connect = async (clientCfg: string, resourceName: string): Promise<any> =>
  * Go through PP payment process and return the payer ID
  */
 const PayForURL = async (url: string): Promise<string> => {
-  const browser = await puppeteer.launch({ headless: false, args: ['--lang=en-US,en'] });
+  const browser = await puppeteer.launch({ headless: 'new', args: ['--lang=en-US,en'] });
   const page = await browser.newPage();
 
   logger.info('Opening: ' + url);
