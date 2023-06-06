@@ -56,14 +56,24 @@ const connect = async (clientCfg: string, resourceName: string): Promise<any> =>
  * Go through PP payment process and return the payer ID
  */
 const PayForURL = async (url: string): Promise<string> => {
-  const browser = await puppeteer.launch({ headless: true, args: ['--lang=en-US,en'] });
+  const browser = await puppeteer.launch({ headless: false, args: ['--lang=en-US,en'] });
   const page = await browser.newPage();
 
   logger.info('Opening: ' + url);
 
+  let payerId: string = null;
+
+  const handler = (req, res) => {
+    const url = req.protocol + '://' + req.get('host') + req.originalUrl;
+    logger.info('Received request: ' + url);
+    payerId = new URL(url).searchParams.get('PayerID');
+    res.send('ok');
+  };
+
   const app = express();
-  app.get('/complete', (req, res) => res.send('complete'));
+  app.get('/complete', handler);
   app.get('/cancel', (req, res) => res.send('cancel'));
+  app.get('/Rcpg/PayCardless', handler);
   const server = app.listen(61234);
 
   while (true) {
@@ -82,10 +92,12 @@ const PayForURL = async (url: string): Promise<string> => {
       logger.warn('Login button not found');
 
       try {
-        await page.select('#languageSelector', 'zh');
-        await page.waitForTimeout(5000);
-        await page.select('#languageSelector', 'en');
-        await page.waitForTimeout(5000);
+        await page.select('#languageSelector', 'zh').catch(() => null);
+        await page.select('#languageSelector', 'en').catch(() => null);
+
+        page.waitForXPath('//button[contains(text(), "English")]', {
+          timeout: 5000
+        }).then(x => (x as any).click());
 
         try {
           loginButton = await page.waitForXPath('//button[contains(translate(., "LOGIN", "login"),"log in")]', {
@@ -164,8 +176,6 @@ const PayForURL = async (url: string): Promise<string> => {
     break;
   }
 
-  const payerId = (new URL(page.url())).searchParams.get('PayerID');
-
   logger.info('Received Payer ID: ' + payerId);
 
   await browser.close();
@@ -177,7 +187,8 @@ const PayForURL = async (url: string): Promise<string> => {
 
 
 describe('testing payment-srv', () => {
-  before(async () => {
+  before(async function () {
+    this.timeout(30000);
     await start();
     paymentService = await connect('client:payment-srv', '');
   });
