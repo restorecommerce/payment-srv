@@ -1,3 +1,8 @@
+## 1.0.0 (June 20th, 2023)
+
+- update all dependencies
+- enable data stream based logging by default
+
 ## 0.0.3 (December 2nd, 2020)
 
 - fix docker image permissions
