@@ -15,17 +15,7 @@
   },
   "client": {
     "payment-srv": {
-      "address": "localhost:50078",
-      "proto": {
-        "protoRoot": "node_modules/@restorecommerce/protos/",
-        "protoPath": "io/restorecommerce/payment.proto",
-        "services": {
-          "payment-srv": {
-            "packageName": "io.restorecommerce.payment",
-            "serviceName": "Service"
-          }
-        }
-      }
+      "address": "localhost:50078"
     }
   },
   "events": {
