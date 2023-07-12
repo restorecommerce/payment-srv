@@ -24,7 +24,7 @@
     "@restorecommerce/logger": "^1.2.1",
     "@restorecommerce/protos": "^4.0.1",
     "@restorecommerce/rc-grpc-clients": "^4.0.1",
-    "@restorecommerce/service-config": "^1.0.5",
+    "@restorecommerce/service-config": "^1.0.6",
     "child_process": "^1.0.2",
     "redis": "^4.6.7",
     "util": "^0.12.5"
