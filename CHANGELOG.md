@@ -1,3 +1,8 @@
+## 1.0.1 (July 28th, 2023)
+
+- update dependencies
+- refactor owner and role association attributes
+
 ## 1.0.0 (June 20th, 2023)
 
 - update all dependencies
