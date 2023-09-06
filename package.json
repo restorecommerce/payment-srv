@@ -31,7 +31,7 @@
   },
   "devDependencies": {
     "@types/koa": "^2.13.7",
-    "@types/lodash": "^4.14.196",
+    "@types/lodash": "^4.14.198",
     "@types/mocha": "^10.0.1",
     "@types/node": "^20.4.5",
     "@types/redis": "^4.0.11",
