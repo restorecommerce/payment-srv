@@ -8,6 +8,7 @@ import type {
   CaptureRequest
 } from '@restorecommerce/rc-grpc-clients/dist/generated-server/io/restorecommerce/payment';
 import { DeepPartial } from '@restorecommerce/kafka-client/lib/protos';
+import logger from './logger';
 
 export class PaymentService implements PaymentServiceImplementation {
 
@@ -26,11 +27,11 @@ export class PaymentService implements PaymentServiceImplementation {
   }
 
   async start(): Promise<void> {
-    console.log('Calling start....');
+    logger.info('PaymentService started successfully');
   }
 
   async stop(): Promise<void> {
-    console.log('Calling stop....');
+    logger.info('PaymentService stopped successfully');
   }
 
   async setupAuthorization(request: SetupRequest): Promise<DeepPartial<SetupResponse>> {
@@ -83,7 +84,7 @@ export class PaymentService implements PaymentServiceImplementation {
       delete result.item.payload.data;
     }
 
-    console.log(result);
+    logger.debug('Result', result);
     return result;
   }
 
