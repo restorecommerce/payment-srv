@@ -1,3 +1,7 @@
+## 1.1.0 (September 22nd, 2023)
+
+- update proto files (made all fields optinoals)
+
 ## 1.0.1 (July 28th, 2023)
 
 - update dependencies
