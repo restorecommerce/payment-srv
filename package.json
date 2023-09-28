@@ -32,7 +32,7 @@
   "devDependencies": {
     "@types/koa": "^2.13.9",
     "@types/lodash": "^4.14.198",
-    "@types/mocha": "^10.0.1",
+    "@types/mocha": "^10.0.2",
     "@types/node": "^20.6.3",
     "@types/redis": "^4.0.11",
     "@typescript-eslint/eslint-plugin": "^6.7.2",
