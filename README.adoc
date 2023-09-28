@@ -1,14 +1,14 @@
 = Payment Service
 
-https://travis-ci.org/restorecommerce/payment-srv?branch=master[image:https://img.shields.io/travis/restorecommerce/payment-srv/master.svg?style=flat-square[Build Status]]
+https://github.com/restorecommerce/payment-srv/actions/workflows/build.yaml[image:https://img.shields.io/github/actions/workflow/status/restorecommerce/payment-srv/build.yaml?style=flat-square[Build Status]]
 https://depfu.com/repos/github/restorecommerce/payment-srv?branch=master[image:https://img.shields.io/depfu/dependencies/github/restorecommerce/payment-srv?style=flat-square[Dependencies]]
 https://coveralls.io/github/restorecommerce/payment-srv?branch=master[image:https://img.shields.io/coveralls/github/restorecommerce/payment-srv/master.svg?style=flat-square[Coverage Status]]
 
-A microservice for handling payment authorizations and purchases.
+A microservice for handling payment authorizations for purchases.
 
 Please consult the documentation for using it:
 
 - *link:https://docs.restorecommerce.io/payment-srv/index.html[Usage]*
-- *link:https://docs.restorecommerce.io/architecture/index.html[General Architecture]*
+- *link:https://docs.restorecommerce.io/architecture/index.html[Restorecommerce Architecture]*
 
 Part of link:https://github.com/restorecommerce[Restorecommerce].
