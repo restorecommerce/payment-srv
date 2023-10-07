@@ -1,3 +1,7 @@
+## 1.2.0 (September 22nd, 2023)
+
+- update node and all deps
+
 ## 1.1.0 (September 22nd, 2023)
 
 - update proto files (made all fields optinoals)
