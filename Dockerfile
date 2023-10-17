@@ -22,7 +22,6 @@ COPY --chown=node:node . .
 
 RUN npm run build
 
-
 ### Deployment
 FROM base as deployment
 
@@ -36,5 +35,4 @@ EXPOSE 50051
 USER root
 USER node
 
-HEALTHCHECK CMD ["/bin/grpc_health_probe", "-addr=:50051"]
 CMD [ "npm", "start" ]
