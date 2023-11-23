@@ -153,7 +153,7 @@ const PayForURL = async (url: string): Promise<string> => {
     });
 
     logger.info('Waiting for Reviewing Payment');
-    const reviewButton = await page.waitForSelector('button#payment-submit-btn', {
+    let reviewButton = await page.waitForSelector('button#payment-submit-btn', {
       timeout: 300000
     });
     logger.info('Reviewing Payment');
@@ -165,11 +165,16 @@ const PayForURL = async (url: string): Promise<string> => {
 
     await page.waitForTimeout(10000);
 
+    reviewButton = await page.waitForSelector('button#payment-submit-btn', {
+      timeout: 300000
+    });
     await reviewButton.click();
 
     logger.info('Waiting for redirect');
 
-    await page.waitForNavigation();
+    await page.waitForNavigation({
+      timeout: 300000
+    });
 
     logger.info('Transaction complete');
 
