@@ -1,3 +1,7 @@
+## 1.2.1 (November 25th, 2023)
+
+- update deps
+
 ## 1.2.0 (September 22nd, 2023)
 
 - update node and all deps
