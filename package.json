@@ -1,6 +1,6 @@
 {
   "name": "payment-srv",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "Restore Commerce Payment Gateway (RCPG) Microservice client.",
   "main": "index.js",
   "repository": {
@@ -17,7 +17,7 @@
     "srv"
   ],
   "dependencies": {
-    "@restorecommerce/chassis-srv": "^1.4.3",
+    "@restorecommerce/chassis-srv": "^1.4.4",
     "@restorecommerce/cluster-service": "^1.0.2",
     "@restorecommerce/grpc-client": "^2.0.8",
     "@restorecommerce/kafka-client": "^1.1.12",
