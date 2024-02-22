@@ -1,4 +1,4 @@
-import { RubyExecutor } from './ruby';
+import { RubyExecutor } from './ruby.js';
 import type {
   PaymentServiceImplementation,
   SetupRequest,
@@ -6,9 +6,9 @@ import type {
   PaymentRequest,
   PaymentResponse,
   CaptureRequest
-} from '@restorecommerce/rc-grpc-clients/dist/generated-server/io/restorecommerce/payment';
-import { DeepPartial } from '@restorecommerce/kafka-client/lib/protos';
-import logger from './logger';
+} from '@restorecommerce/rc-grpc-clients/dist/generated-server/io/restorecommerce/payment.js';
+import { DeepPartial } from '@restorecommerce/kafka-client/lib/protos.js';
+import logger from './logger.js';
 
 export class PaymentService implements PaymentServiceImplementation {
 

@@ -1,9 +1,9 @@
-import { spawn } from 'child_process';
-import logger from './logger';
-import { PaymentService } from './service';
-import { Provider } from '@restorecommerce/rc-grpc-clients/dist/generated-server/io/restorecommerce/payment';
-import { parseInt } from 'lodash';
-import { OperationStatus, Status } from '@restorecommerce/rc-grpc-clients/dist/generated-server/io/restorecommerce/status';
+import { spawn } from 'node:child_process';
+import logger from './logger.js';
+import { PaymentService } from './service.js';
+import { Provider } from '@restorecommerce/rc-grpc-clients/dist/generated-server/io/restorecommerce/payment.js';
+import { parseInt } from 'lodash-es';
+import { OperationStatus, Status } from '@restorecommerce/rc-grpc-clients/dist/generated-server/io/restorecommerce/status.js';
 
 export class RubyExecutor {
 

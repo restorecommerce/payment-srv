@@ -1,7 +1,7 @@
 import should from 'should';
-import { Worker } from '../src/worker';
-import logger from '../src/logger';
-import { cfg } from '../src/config';
+import { Worker } from '../src/worker.js';
+import logger from '../src/logger.js';
+import { cfg } from '../src/config.js';
 import { createChannel, createClient } from '@restorecommerce/grpc-client';
 import * as kafkaClient from '@restorecommerce/kafka-client';
 import puppeteer from 'puppeteer';
@@ -11,8 +11,8 @@ import {
   PaymentServiceClient,
   SetupRequest,
   Provider
-} from '@restorecommerce/rc-grpc-clients/dist/generated-server/io/restorecommerce/payment';
-import { DeepPartial } from '@restorecommerce/kafka-client/lib/protos';
+} from '@restorecommerce/rc-grpc-clients/dist/generated-server/io/restorecommerce/payment.js';
+import { DeepPartial } from '@restorecommerce/kafka-client/lib/protos.js';
 
 const Events = kafkaClient.Events;
 

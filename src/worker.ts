@@ -1,18 +1,22 @@
-import { cfg } from './config';
-import logger from './logger';
+import { cfg } from './config.js';
+import logger from './logger.js';
 import * as Chassis from '@restorecommerce/chassis-srv';
 import { Events, registerProtoMeta } from '@restorecommerce/kafka-client';
-import { PaymentService } from './service';
-import { PaymentServiceCommandInterface } from './paymentServiceCommandInterface';
+import { PaymentService } from './service.js';
+import { PaymentServiceCommandInterface } from './paymentServiceCommandInterface.js';
 import { createClient, RedisClientType } from 'redis';
-import { BindConfig } from '@restorecommerce/chassis-srv/lib/microservice/transport/provider/grpc';
-import { PaymentServiceDefinition, protoMetadata as paymentMeta } from '@restorecommerce/rc-grpc-clients/dist/generated-server/io/restorecommerce/payment';
-import { CommandInterfaceServiceDefinition, protoMetadata as commandInterfaceMeta } from '@restorecommerce/rc-grpc-clients/dist/generated-server/io/restorecommerce/commandinterface';
+import { BindConfig } from '@restorecommerce/chassis-srv/lib/microservice/transport/provider/grpc/index.js';
+import { PaymentServiceDefinition, protoMetadata as paymentMeta }
+  from '@restorecommerce/rc-grpc-clients/dist/generated-server/io/restorecommerce/payment.js';
+import {
+  CommandInterfaceServiceDefinition,
+  protoMetadata as commandInterfaceMeta
+} from '@restorecommerce/rc-grpc-clients/dist/generated-server/io/restorecommerce/commandinterface.js';
 import {
   protoMetadata as reflectionMeta,
-} from '@restorecommerce/rc-grpc-clients/dist/generated-server/grpc/reflection/v1alpha/reflection';
+} from '@restorecommerce/rc-grpc-clients/dist/generated-server/grpc/reflection/v1alpha/reflection.js';
 import { ServerReflectionService } from 'nice-grpc-server-reflection';
-import { HealthDefinition } from '@restorecommerce/rc-grpc-clients/dist/generated-server/grpc/health/v1/health';
+import { HealthDefinition } from '@restorecommerce/rc-grpc-clients/dist/generated-server/grpc/health/v1/health.js';
 
 registerProtoMeta(
   paymentMeta,
@@ -63,7 +67,7 @@ export class Worker {
       if (kafkaCfg.topics[topicType].events) {
         const eventNames = kafkaCfg.topics[topicType].events;
         for (let eventName of eventNames) {
-          await this.topics[topicType].on(eventName, eventListener, {startingOffset: offSetValue});
+          await this.topics[topicType].on(eventName, eventListener, { startingOffset: offSetValue });
         }
       }
     }
@@ -113,19 +117,4 @@ export class Worker {
     await this.server.stop();
     await this.events.stop();
   }
-}
-
-if (require.main === module) {
-  const worker = new Worker();
-  worker.start().then().catch((err) => {
-    logger.error('startup error', err);
-    process.exit(1);
-  });
-
-  process.on('SIGINT', () => {
-    worker.stop().then().catch((err) => {
-      logger.error('shutdown error', err);
-      process.exit(1);
-    });
-  });
 }
