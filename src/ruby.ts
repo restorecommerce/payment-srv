@@ -49,7 +49,7 @@ export class RubyExecutor {
 
       rubyRunner.on('close', () => {
         let response: any = {};
-        let status: Status = { id: '', code: 0, message: '' };
+        const status: Status = { id: '', code: 0, message: '' };
         let operation_status: OperationStatus = { code: 0, message: '' };
 
         if (stderr !== '') {
@@ -70,7 +70,7 @@ export class RubyExecutor {
             status.message = 'success';
           }
         }
-        let item = {
+        const item = {
           payload: response,
           status
         };
