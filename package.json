@@ -71,7 +71,7 @@
     "tsdev:nocluster": "ts-node-dev --no-notify --respawn --transpileOnly ./src/start.ts",
     "test": "npm run lint && c8 --reporter=text npm run mocha --timeout=5000",
     "mocha": "cross-env NODE_ENV=test mocha --timeout 15000 -r ts-node/register -R spec ./test/*.spec.ts --full-trace --exit",
-    "build:es": "esbuild ./src/start.ts --bundle --platform=node --outfile=lib/index.cjs --minify --tree-shaking=true --sourcemap=inline",
+    "build:es": "esbuild ./src/start.ts --bundle --platform=node --outfile=lib/start.cjs --minify --tree-shaking=true --sourcemap=inline",
     "lcov-report": "c8 report --reporter=lcov",
     "build:clean": "rimraf lib",
     "build": "npm-run-all lint build:clean build:es",
