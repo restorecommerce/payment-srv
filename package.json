@@ -64,14 +64,14 @@
     "typescript": "^5.5.2"
   },
   "scripts": {
-    "lint": "eslint src --ext .ts",
+    "lint": "eslint src",
     "start": "node lib/start.cjs",
     "dev": "cross-env NODE_ENV=development nodemon --watch './src/**/*.ts' --exec node --loader ts-node/esm ./src/start.ts",
     "tsdev": "ts-node-dev --no-notify --respawn --transpileOnly ./src",
     "tsdev:nocluster": "ts-node-dev --no-notify --respawn --transpileOnly ./src/start.ts",
     "test": "npm run lint && c8 --reporter=text npm run mocha --timeout=5000",
     "mocha": "cross-env NODE_ENV=test mocha --timeout 15000 -r ts-node/register -R spec ./test/*.spec.ts --full-trace --exit",
-    "build:es": "esbuild ./src/start.ts --bundle --platform=node --outfile=lib/index.cjs --minify --tree-shaking=true --sourcemap=inline",
+    "build:es": "esbuild ./src/start.ts --bundle --platform=node --outfile=lib/start.cjs --minify --tree-shaking=true --sourcemap=inline",
     "lcov-report": "c8 report --reporter=lcov",
     "build:clean": "rimraf lib",
     "build": "npm-run-all lint build:clean build:es",
