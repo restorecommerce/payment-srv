@@ -64,7 +64,7 @@
     "typescript": "^5.5.2"
   },
   "scripts": {
-    "lint": "eslint src --ext .ts",
+    "lint": "eslint src",
     "start": "node lib/start.cjs",
     "dev": "cross-env NODE_ENV=development nodemon --watch './src/**/*.ts' --exec node --loader ts-node/esm ./src/start.ts",
     "tsdev": "ts-node-dev --no-notify --respawn --transpileOnly ./src",
