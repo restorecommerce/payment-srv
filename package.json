@@ -48,7 +48,7 @@
     "c8": "^10.1.2",
     "cross-env": "^7.0.3",
     "esbuild": "^0.21.5",
-    "eslint": "^8.56.0",
+    "eslint": "^9.39.2",
     "eslint-plugin-prefer-arrow-functions": "^3.3.2",
     "express": "^4.19.2",
     "husky": "^9.0.11",
